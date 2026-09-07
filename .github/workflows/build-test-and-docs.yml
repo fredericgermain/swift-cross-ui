@@ -416,52 +416,12 @@ jobs:
     - name: Swift version
       run: swift --version
 
-    - name: Compute vcpkg Triplet
-      id: triplet
-      uses: ASzc/change-string-case-action@v5
-      with:
-        string: ${{ runner.arch }}-${{ runner.os }}
-
     - uses: actions/checkout@v3
 
-    - name: Restore Dependency Cache
-      id: cache
-      uses: actions/cache/restore@v3
-      with:
-        path: vcpkg_installed
-        key: vcpkg-${{ steps.triplet.outputs.lowercase }}-${{ hashFiles('vcpkg.json') }}
-
-    - name: Apply GNOME-pango checksum fix (issue caused by Anubis)
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        # This fix is from @Kwizatz: https://github.com/microsoft/vcpkg/issues/47984#issuecomment-3471327762
-        mkdir C:\vcpkg\downloads
-        curl -o C:\vcpkg\downloads\GNOME-pango-1.56.1.tar.gz "https://gitlab.gnome.org//GNOME/pango/-/archive/1.56.1/pango-1.56.1.tar.gz"
-        curl -o C:\vcpkg\downloads\GNOME-gdk-pixbuf-2.42.12.tar.gz "https://gitlab.gnome.org//GNOME/gdk-pixbuf/-/archive/2.42.12/gdk-pixbuf-2.42.12.tar.gz"
-        curl -o C:\vcpkg\downloads\GNOME-atk-2.38.0.tar.gz "https://gitlab.gnome.org/Archive/atk/-/archive/2.38.0/atk-2.38.0.tar.gz"
-        curl -o C:\vcpkg\downloads\GNOME-gtk-4.16.3.tar.gz "https://gitlab.gnome.org//GNOME/gtk/-/archive/4.16.3/gtk-4.16.3.tar.gz"
-
-    - name: Build and Install Dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      env:
-        VCPKG_DEFAULT_TRIPLET: ${{ steps.triplet.outputs.lowercase }}
-      run: vcpkg install
-
-    - name: Save Dependency Cache
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
-      with:
-        path: vcpkg_installed
-        key: vcpkg-${{ steps.triplet.outputs.lowercase }}-${{ hashFiles('vcpkg.json') }}
-
     - name: Build SwiftCrossUI
-      env:
-        PKG_CONFIG_PATH: ${{ github.workspace }}/vcpkg_installed/${{ steps.triplet.outputs.lowercase }}/lib/pkgconfig
       run: swift build --target SwiftCrossUI -v
 
     - name: Build _SwiftCrossUIPortingKit
-      env:
-        PKG_CONFIG_PATH: ${{ github.workspace }}/vcpkg_installed/${{ steps.triplet.outputs.lowercase }}/lib/pkgconfig
       run: swift build --target _SwiftCrossUIPortingKit
 
     - name: Build WinUIBackend and extract symbol graphs
