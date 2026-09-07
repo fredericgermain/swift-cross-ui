@@ -277,17 +277,35 @@ jobs:
       shell: bash
       run: |
         cd Examples
-        ../swift-bundler bundle CounterExample --platform Android
-        ../swift-bundler bundle ControlsExample --platform Android
-        ../swift-bundler bundle AdvancedCustomizationExample --platform Android
-        ../swift-bundler bundle ColorsExample --platform Android
-        ../swift-bundler bundle FontsExample --platform Android
-        ../swift-bundler bundle GradientsExample --platform Android
-        ../swift-bundler bundle PathsExample --platform Android
-        ../swift-bundler bundle RandomNumberGeneratorExample --platform Android
-        ../swift-bundler bundle TapGesturesExample --platform Android
-        ../swift-bundler bundle WebViewExample --platform Android
-        ../swift-bundler bundle WindowingExample --platform Android
+        # swift-bundler intermittently segfaults inside libdispatch during
+        # package resolution ("Bad pointer dereference at 0x1"), a Foundation
+        # networking teardown bug on Linux rather than anything about the app
+        # being bundled: the example that crashed here bundles cleanly on
+        # another host and on a retry. Retry rather than failing on a flake,
+        # but give up after three attempts so a real failure still fails.
+        for app in CounterExample \
+            ControlsExample \
+            AdvancedCustomizationExample \
+            ColorsExample \
+            FontsExample \
+            GradientsExample \
+            PathsExample \
+            RandomNumberGeneratorExample \
+            TapGesturesExample \
+            WebViewExample \
+            WindowingExample; do
+          for attempt in 1 2 3; do
+            if ../swift-bundler bundle "$app" --platform Android; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::bundling $app failed three times"
+              exit 1
+            fi
+            echo "::warning::bundling $app failed (attempt $attempt), retrying"
+            sleep 5
+          done
+        done
 
     - name: Build AndroidBackend and extract symbol graphs
       uses: ./.github/actions/extract-symbol-graphs
