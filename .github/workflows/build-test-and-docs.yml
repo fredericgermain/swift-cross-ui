@@ -152,7 +152,11 @@ jobs:
       # Release and checksum retrieved from https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
       SWIFT_RELEASE: swift-6.3-DEVELOPMENT-SNAPSHOT-2026-05-01-a
       SWIFT_ANDROID_SDK_CHECKSUM: 27a0e63264d1b8512522d3a07407ae3d2774eb07d28279ef58e96d1dc2ab720d
-      SWIFT_BUNDLER_REVISION: e6909f16ae8b06dc956ba09a3cee1c4863c165bd
+      # Temporarily a patched fork: upstream's validateArguments refuses any
+      # cross-platform bundle from a non-macOS host, which blocks Android
+      # bundling on Linux even though the layers beneath it handle Linux hosts.
+      SWIFT_BUNDLER_REPO: https://github.com/fredericgermain/swift-bundler
+      SWIFT_BUNDLER_REVISION: 3e30f2634f3a125256746b61010ebc4087823bf7
       # Emitting symbol graphs changes the swiftc flags, which invalidates the
       # whole build directory. Passing the same flags to every build keeps them
       # sharing one build state instead of the last step redoing all the work.
@@ -209,7 +213,7 @@ jobs:
       uses: actions/cache/restore@v5
       with:
         path: ./swift-bundler
-        key: swift-bundler-linux-${{ env.SWIFT_BUNDLER_REVISION }}
+        key: swift-bundler-linux-patched-${{ env.SWIFT_BUNDLER_REVISION }}
 
     - name: Build Swift Bundler
       if: steps.restore-swift-bundler.outputs.cache-hit != 'true'
@@ -218,7 +222,7 @@ jobs:
         set -eux
         checkout="$(pwd)"
         cd ../
-        git clone https://github.com/moreSwift/swift-bundler
+        git clone "$SWIFT_BUNDLER_REPO" swift-bundler
         cd swift-bundler
         git checkout $SWIFT_BUNDLER_REVISION
         swift build -c debug --product swift-bundler
