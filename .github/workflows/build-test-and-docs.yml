@@ -212,14 +212,24 @@ jobs:
     # (AndroidSDKManager.getDefaultCompilationSDKVersion). AndroidBackendHelpers.kt
     # calls TimeZone.getIanaID(), added in API 36, so anything older fails to
     # compile with "Unresolved reference 'getIanaID'".
-    - name: Ensure Android build-tools 36
+    - name: Ensure Android build-tools >= 36
       shell: bash
       run: |
-        set -eux
-        ls "$ANDROID_HOME/build-tools" | sort -V | tail -3
-        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-          --sdk_root="$ANDROID_HOME" "build-tools;36.0.0" "platforms;android-36" >/dev/null
-        ls "$ANDROID_HOME/build-tools" | sort -V | tail -3
+        set -eu
+        newest=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
+        echo "newest build-tools present: $newest"
+        if [ "${newest%%.*}" -lt 36 ]; then
+          echo "installing build-tools;36.0.0"
+          # `yes` is killed by SIGPIPE once sdkmanager stops reading, so keep it
+          # out of the exit status; no pipefail in this step for the same reason.
+          (yes 2>/dev/null || true) \
+            | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+                --sdk_root="$ANDROID_HOME" "build-tools;36.0.0" "platforms;android-36" \
+                >/dev/null
+          echo "now: $(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+        else
+          echo "already >= 36, nothing to do"
+        fi
 
     - name: Restore Swift Bundler
       id: restore-swift-bundler
