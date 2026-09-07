@@ -156,7 +156,7 @@ jobs:
       # cross-platform bundle from a non-macOS host, which blocks Android
       # bundling on Linux even though the layers beneath it handle Linux hosts.
       SWIFT_BUNDLER_REPO: https://github.com/fredericgermain/swift-bundler
-      SWIFT_BUNDLER_REVISION: 3e30f2634f3a125256746b61010ebc4087823bf7
+      SWIFT_BUNDLER_REVISION: 7eed3380f822eebf4aac1bc502cf8751acd20c2a
       # Emitting symbol graphs changes the swiftc flags, which invalidates the
       # whole build directory. Passing the same flags to every build keeps them
       # sharing one build state instead of the last step redoing all the work.
@@ -207,6 +207,19 @@ jobs:
         unzip -qo ndk.zip
         export ANDROID_NDK_HOME=$PWD/android-ndk-r27d
         ./scripts/setup-android-sdk.sh
+
+    # swift-bundler sets compileSdk from the newest build-tools it finds
+    # (AndroidSDKManager.getDefaultCompilationSDKVersion). AndroidBackendHelpers.kt
+    # calls TimeZone.getIanaID(), added in API 36, so anything older fails to
+    # compile with "Unresolved reference 'getIanaID'".
+    - name: Ensure Android build-tools 36
+      shell: bash
+      run: |
+        set -eux
+        ls "$ANDROID_HOME/build-tools" | sort -V | tail -3
+        yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+          --sdk_root="$ANDROID_HOME" "build-tools;36.0.0" "platforms;android-36" >/dev/null
+        ls "$ANDROID_HOME/build-tools" | sort -V | tail -3
 
     - name: Restore Swift Bundler
       id: restore-swift-bundler
