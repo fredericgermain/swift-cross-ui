@@ -460,6 +460,12 @@ jobs:
     runs-on: windows-latest
     needs: check_file_changes
     if: ${{ needs.check_file_changes.outputs.windows == 'true' }}
+    env:
+      # Vend swift-winui from the prebuilt artifact bundle instead of
+      # recompiling the generated WinRT projections, which dominated this job.
+      # The bundle is per toolchain, so it has to match the Swift release
+      # selected below (6.3.3).
+      SWIFT_WINUI_PREBUILT: "1"
     defaults:
       run: # Use powershell because bash is not supported: https://github.com/compnerd/gha-setup-swift/issues/18#issuecomment-1705524890
         shell: pwsh

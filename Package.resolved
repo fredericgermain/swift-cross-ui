@@ -130,10 +130,9 @@
     {
       "identity" : "swift-winui",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/moreSwift/swift-winui",
+      "location" : "https://github.com/fredericgermain/swift-winui",
       "state" : {
-        "revision" : "df7642fbb88e23a9cc1bbd366c7d6d3780fd0251",
-        "version" : "0.2.1"
+        "revision" : "e859ac0ca8dda922d721106b73841eb9d471f6dd"
       }
     },
     {

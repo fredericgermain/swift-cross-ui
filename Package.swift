@@ -169,9 +169,15 @@ let package = Package(
             url: "https://github.com/stackotter/swift-image-formats",
             .upToNextMinor(from: "0.5.0")
         ),
+        // Fork of moreSwift/swift-winui that can vend its products from a
+        // prebuilt artifact bundle instead of recompiling the ~317 generated
+        // WinRT projection sources. Setting SWIFT_WINUI_PREBUILT=1 switches it
+        // on; unset, it builds from source exactly like upstream, which is the
+        // fallback whenever no bundle matches the toolchain. Pinned to a
+        // revision because the prebuilt support is not upstream.
         .package(
-            url: "https://github.com/moreSwift/swift-winui",
-            .upToNextMinor(from: "0.2.1")
+            url: "https://github.com/fredericgermain/swift-winui",
+            revision: "e859ac0ca8dda922d721106b73841eb9d471f6dd"
         ),
         .package(
             url: "https://github.com/stackotter/swift-benchmark",
