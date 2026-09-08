@@ -150,8 +150,10 @@ jobs:
     if: ${{ needs.check_file_changes.outputs.android == 'true' }}
     env:
       # Release and checksum retrieved from https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
-      SWIFT_RELEASE: swift-6.3-DEVELOPMENT-SNAPSHOT-2026-05-01-a
-      SWIFT_ANDROID_SDK_CHECKSUM: 27a0e63264d1b8512522d3a07407ae3d2774eb07d28279ef58e96d1dc2ab720d
+      # 6.3 is released, so the Android job no longer needs a development
+      # snapshot. Checksum from https://www.swift.org/api/v1/install/releases.json
+      SWIFT_RELEASE: swift-6.3.3-RELEASE
+      SWIFT_ANDROID_SDK_CHECKSUM: d160cc3206dd1886dae3fef2337af5e25ec034692cd0ec225721c56cc69da7f5
       # Temporarily a patched fork: upstream's validateArguments refuses any
       # cross-platform bundle from a non-macOS host, which blocks Android
       # bundling on Linux even though the layers beneath it handle Linux hosts.
@@ -196,7 +198,7 @@ jobs:
         set -eux
         # Adapted from https://www.swift.org/documentation/articles/swift-sdk-for-android-getting-started.html
         swift sdk install \
-          "https://download.swift.org/swift-6.3-branch/android-sdk/$SWIFT_RELEASE/${SWIFT_RELEASE}_android.artifactbundle.tar.gz" \
+          "https://download.swift.org/swift-6.3.3-release/android-sdk/$SWIFT_RELEASE/${SWIFT_RELEASE}_android.artifactbundle.tar.gz" \
           --checksum "$SWIFT_ANDROID_SDK_CHECKSUM"
 
         # Guess some common places where the swift-sdks file lives
@@ -465,8 +467,8 @@ jobs:
     - name: Setup
       uses: compnerd/gha-setup-swift@v0.3.0
       with:
-        branch: swift-6.1-release
-        tag: 6.1-RELEASE
+        branch: swift-6.3.3-release
+        tag: 6.3.3-RELEASE
 
     - name: Swift version
       run: swift --version
@@ -505,7 +507,7 @@ jobs:
     - name: Install Swift
       uses: SwiftyLab/setup-swift@latest
       with:
-        swift-version: "6.1.0"
+        swift-version: "6.3.3"
 
     - name: Swift version
       run: swift --version
