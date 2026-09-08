@@ -152,6 +152,10 @@ jobs:
       # Release and checksum retrieved from https://www.swift.org/api/v1/install/dev/6.3/android-sdk.json
       # 6.3 is released, so the Android job no longer needs a development
       # snapshot. Checksum from https://www.swift.org/api/v1/install/releases.json
+      # Two spellings of the same version: swiftly selects a release as
+      # "6.3.3", while the SDK download path and artifactbundle directory use
+      # the full "swift-6.3.3-RELEASE" form.
+      SWIFT_VERSION: 6.3.3
       SWIFT_RELEASE: swift-6.3.3-RELEASE
       SWIFT_ANDROID_SDK_CHECKSUM: d160cc3206dd1886dae3fef2337af5e25ec034692cd0ec225721c56cc69da7f5
       # Temporarily a patched fork: upstream's validateArguments refuses any
@@ -179,7 +183,7 @@ jobs:
           if [ -d "$d" ]; then echo "$d" >>"$GITHUB_PATH"; fi
         done
 
-    - name: Install Swift 6.3 snapshot
+    - name: Install Swift toolchain
       shell: bash
       run: |
         set -eux
@@ -187,12 +191,12 @@ jobs:
         # though the toolchain itself installs fine. Not needed on macOS.
         sudo apt-get update -qq
         sudo apt-get install -y libcurl4-openssl-dev
-        swiftly install --use "$SWIFT_RELEASE"
+        swiftly install --use "$SWIFT_VERSION"
 
     - name: Swift version
       run: swift --version
 
-    - name: Install Swift for Android SDK (6.3 snapshot)
+    - name: Install Swift for Android SDK
       shell: bash
       run: |
         set -eux
