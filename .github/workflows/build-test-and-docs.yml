@@ -242,7 +242,7 @@ jobs:
       uses: actions/cache/restore@v5
       with:
         path: ./swift-bundler
-        key: swift-bundler-linux-patched-${{ env.SWIFT_BUNDLER_REVISION }}
+        key: swift-bundler-linux-patched-${{ env.SWIFT_VERSION }}-${{ env.SWIFT_BUNDLER_REVISION }}
 
     - name: Build Swift Bundler
       if: steps.restore-swift-bundler.outputs.cache-hit != 'true'
@@ -254,8 +254,8 @@ jobs:
         git clone "$SWIFT_BUNDLER_REPO" swift-bundler
         cd swift-bundler
         git checkout $SWIFT_BUNDLER_REVISION
-        swift build -c debug --product swift-bundler
-        cp .build/debug/swift-bundler $checkout/swift-bundler
+        swift build -c release --product swift-bundler
+        cp .build/release/swift-bundler $checkout/swift-bundler
 
     - name: Cache Swift Bundler
       id: cache-swift-bundler
